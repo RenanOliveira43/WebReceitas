@@ -1,7 +1,0 @@
-[build]
-  functions = "functions"
-  command = "npm install"
-
-[functions]
-  node_bundler = "esbuild"
-
