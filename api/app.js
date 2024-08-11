@@ -22,43 +22,63 @@ app.get('/add', (req, res) => {
 });
 
 app.post('/add', (req, res) => {
-    const { title, description, password } = req.body;
-    if (verificarSenha(password)) {
-        recipes.push({ id: recipes.length + 1, title, description: description.replace(/\n/g, '<br>') });
-        res.redirect('/');
-    } else {
-        res.status(403).send('Senha incorreta');
+    try {
+        const { title, description, password } = req.body;
+        if (verificarSenha(password)) {
+            const newRecipe = { id: (recipes.length > 0 ? recipes[recipes.length - 1].id : 0) + 1, title, description: description.replace(/\n/g, '<br>') };
+            recipes.push(newRecipe);
+            res.redirect('/');
+        } else {
+            res.status(403).send('Senha incorreta');
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar receita:', error);
+        res.status(500).send('Erro interno do servidor');
     }
 });
 
 app.get('/edit/:id', (req, res) => {
     const recipe = recipes.find(r => r.id === parseInt(req.params.id));
-    res.render('edit_recipe', { recipe });
+    if (recipe) {
+        res.render('edit_recipe', { recipe });
+    } else {
+        res.status(404).send('Receita não encontrada');
+    }
 });
 
 app.post('/edit/:id', (req, res) => {
-    const { title, description, password } = req.body;
-    if (verificarSenha(password)) {
-        const recipe = recipes.find(r => r.id === parseInt(req.params.id));
-        if (recipe) {
-            recipe.title = title;
-            recipe.description = description.replace(/\n/g, '<br>');
-            res.redirect('/');
+    try {
+        const { title, description, password } = req.body;
+        if (verificarSenha(password)) {
+            const recipe = recipes.find(r => r.id === parseInt(req.params.id));
+            if (recipe) {
+                recipe.title = title;
+                recipe.description = description.replace(/\n/g, '<br>');
+                res.redirect('/');
+            } else {
+                res.status(404).send('Receita não encontrada');
+            }
         } else {
-            res.status(404).send('Receita não encontrada');
+            res.status(403).send('Senha incorreta');
         }
-    } else {
-        res.status(403).send('Senha incorreta');
+    } catch (error) {
+        console.error('Erro ao editar receita:', error);
+        res.status(500).send('Erro interno do servidor');
     }
 });
 
 app.get('/delete/:id', (req, res) => {
-    const password = req.query.password;
-    if (verificarSenha(password)) {
-        recipes = recipes.filter(r => r.id !== parseInt(req.params.id));
-        res.redirect('/');
-    } else {
-        res.status(403).send('Senha incorreta');
+    try {
+        const password = req.query.password;
+        if (verificarSenha(password)) {
+            recipes = recipes.filter(r => r.id !== parseInt(req.params.id));
+            res.redirect('/');
+        } else {
+            res.status(403).send('Senha incorreta');
+        }
+    } catch (error) {
+        console.error('Erro ao deletar receita:', error);
+        res.status(500).send('Erro interno do servidor');
     }
 });
 
