@@ -4,19 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar receita</title>
+    
 </head>
 <body>
     <h1>Editar receita</h1>
     <form method="post">
         <label class="titulo" for="title">Título</label>
-        <input class="titulo" type="text" id="title" name="title" value="<%= recipe.title %>">
+        <input class="titulo" type="text" id="title" name="title" value="<%= recipe.title %>" required>
         <br>
         <label class="titulo" for="description">Ingredientes</label>
-        <textarea class="descricao" id="description" name="description"><%= recipe.description.replace(/<br>/g, '\n') %></textarea>
+        <textarea class="descricao" id="description" name="description" required><%= recipe.description.replace(/<br>/g, '\n') %></textarea>
+        <br>
+        <label class="titulo" for="password">Senha</label>
+        <input class="titulo" type="password" id="password" name="password" required>
         <br>
         <button class="btn" type="submit">Salvar</button>
     </form>
     <a href="/">Voltar</a>
+
     <style>
         @import url('https://fonts.googleapis.com/css?family=Work+Sans:400,600');
         body {

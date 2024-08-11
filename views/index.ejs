@@ -14,11 +14,11 @@
             <h2><%= recipe.title %></h2>
             <p><%- recipe.description.split('\n').join('<br>') %></p>
             <a href="/edit/<%= recipe.id %>">Editar</a>
-            <a href="/delete/<%= recipe.id %>" class="delete-link">Deletar</a>
+            <a href="/delete/<%= recipe.id %>?password=" class="delete-link" onclick="return confirmDelete(event, '<%= recipe.id %>')">Deletar</a>
         </li>
         <% }); %>
     </ul>
-
+    
     <style>
         @import url('https://fonts.googleapis.com/css?family=Work+Sans:400,600');
         body {
@@ -68,23 +68,23 @@
         }
 
         @media (max-width: 600px) {
-            .titulo, .descricao {
-                width: 100%;
-            }
-
             ul, li {
                 width: 90%;
             }
         }
     </style>
+    
     <script>
-        document.querySelectorAll('.delete-link').forEach(link => {
-            link.addEventListener('click', function (event) {
-                if (!confirm('Tem certeza que deseja excluir esta receita?')) {
-                    event.preventDefault();
-                }
-            });
-        });
+        function confirmDelete(event, id) {
+            const password = prompt('Digite a senha para confirmar a exclusão:');
+            if (!password) {
+                event.preventDefault();
+                return false;
+            }
+            const url = `/delete/${id}?password=${encodeURIComponent(password)}`;
+            window.location.href = url;
+            return false;
+        }
     </script>
 </body>
 </html>

@@ -7,12 +7,15 @@
 </head>
 <body>
     <h1>Adicionar uma nova receita</h1>
-    <form method="post">
+    <form method="post" action="/add">
         <label class="titulo" for="title">Título</label>
         <input class="titulo" type="text" id="title" name="title" required>
         <br>
         <label class="titulo" for="description">Ingredientes</label>
         <textarea class="descricao" id="description" name="description" required></textarea>
+        <br>
+        <label class="titulo" for="password">Senha</label>
+        <input class="titulo" type="password" id="password" name="password" required>
         <br>
         <button class="btn" type="submit">Adicionar</button>
     </form>
