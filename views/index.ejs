@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="icons8-turquia-16.png" rel="icon" type="image/png" sizes="16x16" />
     <title>Receitas do Renan</title>
 </head>
 <body>
@@ -34,23 +35,30 @@
             margin-top: 15px;
         }
 
-        h2 {
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-
         ul {
             list-style: none;
             padding: 0;
-            width: 25%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
         li {
             border: 1px solid whitesmoke;
-            margin-bottom: 10px;
             padding: 15px;
             color: white;
             border-radius: 5px;
+            background-color: #2B3A50;
+        }
+
+        h2 {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
         }
 
         a {
@@ -68,8 +76,8 @@
         }
 
         @media (max-width: 600px) {
-            ul, li {
-                width: 90%;
+            ul {
+                grid-template-columns: 1fr;
             }
         }
     </style>

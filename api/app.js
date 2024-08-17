@@ -1,10 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { sql } = require('@vercel/postgres');
 const app = express();
 
-let recipes = [];
-const superSenha = 'vandaobobao';
+const superSenha = '';
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '../public')));
@@ -13,20 +13,46 @@ app.set('views', path.join(__dirname, '../views'));
 
 const verificarSenha = (senha) => senha === superSenha;
 
-app.get('/', (req, res) => {
-    res.render('index', { recipes });
+const createTable = async () => {
+    try {
+        await sql`
+            CREATE TABLE IF NOT EXISTS recipes (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                description TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `;
+        console.log("Tabela 'recipes' verificada/criada com sucesso.");
+    } catch (error) {
+        console.error('Erro ao criar/verificar tabela:', error);
+    }
+};
+
+createTable();
+
+app.get('/', async (req, res) => {
+    try {
+        const { rows: recipes } = await sql`SELECT * FROM recipes ORDER BY id ASC`;
+        res.render('index', { recipes });
+    } catch (error) {
+        console.error('Erro ao buscar receitas:', error);
+        res.status(500).send('Erro ao buscar receitas');
+    }
 });
 
 app.get('/add', (req, res) => {
     res.render('add_recipe');
 });
 
-app.post('/add', (req, res) => {
+app.post('/add', async (req, res) => {
     try {
         const { title, description, password } = req.body;
         if (verificarSenha(password)) {
-            const newRecipe = { id: (recipes.length > 0 ? recipes[recipes.length - 1].id : 0) + 1, title, description: description.replace(/\n/g, '<br>') };
-            recipes.push(newRecipe);
+            await sql`
+                INSERT INTO recipes (title, description)
+                VALUES (${title}, ${description.replace(/\n/g, '<br>')})
+            `;
             res.redirect('/');
         } else {
             res.status(403).send('Senha incorreta');
@@ -37,27 +63,31 @@ app.post('/add', (req, res) => {
     }
 });
 
-app.get('/edit/:id', (req, res) => {
-    const recipe = recipes.find(r => r.id === parseInt(req.params.id));
-    if (recipe) {
-        res.render('edit_recipe', { recipe });
-    } else {
-        res.status(404).send('Receita não encontrada');
+app.get('/edit/:id', async (req, res) => {
+    try {
+        const { rows } = await sql`SELECT * FROM recipes WHERE id = ${req.params.id}`;
+        const recipe = rows[0];
+        if (recipe) {
+            res.render('edit_recipe', { recipe });
+        } else {
+            res.status(404).send('Receita não encontrada');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar receita:', error);
+        res.status(500).send('Erro ao buscar receita');
     }
 });
 
-app.post('/edit/:id', (req, res) => {
+app.post('/edit/:id', async (req, res) => {
     try {
         const { title, description, password } = req.body;
         if (verificarSenha(password)) {
-            const recipe = recipes.find(r => r.id === parseInt(req.params.id));
-            if (recipe) {
-                recipe.title = title;
-                recipe.description = description.replace(/\n/g, '<br>');
-                res.redirect('/');
-            } else {
-                res.status(404).send('Receita não encontrada');
-            }
+            await sql`
+                UPDATE recipes
+                SET title = ${title}, description = ${description.replace(/\n/g, '<br>')}
+                WHERE id = ${req.params.id}
+            `;
+            res.redirect('/');
         } else {
             res.status(403).send('Senha incorreta');
         }
@@ -67,11 +97,11 @@ app.post('/edit/:id', (req, res) => {
     }
 });
 
-app.get('/delete/:id', (req, res) => {
+app.get('/delete/:id', async (req, res) => {
     try {
         const password = req.query.password;
         if (verificarSenha(password)) {
-            recipes = recipes.filter(r => r.id !== parseInt(req.params.id));
+            await sql`DELETE FROM recipes WHERE id = ${req.params.id}`;
             res.redirect('/');
         } else {
             res.status(403).send('Senha incorreta');
